@@ -34,7 +34,7 @@ class SRXL2:
         self.device = device
         self.port = port
 
-    def connect(self):
+    def connect(self) -> serial.Serial:
         if self.port == 'loop://':
             self.serial = serial.serial_for_url(self.port, 115200, timeout=0.001)
         else:
