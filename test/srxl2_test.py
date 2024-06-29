@@ -1,15 +1,15 @@
-import logging
 import unittest
 
 import serial
 
-from protocols.srxl2 import SRXL2, DeviceDescriptor, TELEMETRY_RANGE
-from test.srxl2_test_utils import create_remote_receiver_device, create_student_device
+from protocols.srxl2 import SRXL2
+from srxl2_test_utils import create_remote_receiver_device, create_student_device
 from utils.common import delay
+from utils.my_logging import setup_logging
 
 SERIAL_PORT = 'COM3'
 
-logging.basicConfig(level=logging.DEBUG, handlers=[logging.StreamHandler()])
+setup_logging()
 
 
 class MyTestCase(unittest.TestCase):
