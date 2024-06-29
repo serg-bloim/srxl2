@@ -12,7 +12,7 @@ class MyTestCase(unittest.TestCase):
             print(p)
 
     def test_serial_write(self):
-        with serial.Serial('/dev/tty.usbserial-0001', 115200, timeout=1) as ser:
+        with serial.Serial('COM3', 115200, timeout=1) as ser:
             ser.write(b"hello from python\n")
             resp = ser.readall()
             print(resp)

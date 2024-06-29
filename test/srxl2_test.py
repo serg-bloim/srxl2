@@ -4,27 +4,32 @@ import unittest
 import serial
 
 from protocols.srxl2 import SRXL2, DeviceDescriptor, TELEMETRY_RANGE
+from test.srxl2_test_utils import create_remote_receiver_device, create_student_device
 from utils.common import delay
+
+SERIAL_PORT = 'COM3'
 
 logging.basicConfig(level=logging.DEBUG, handlers=[logging.StreamHandler()])
 
 
-def create_student_device():
-    return DeviceDescriptor(b'\x52\x47\x53\x00', 0x10, TELEMETRY_RANGE.FLYBY)
-
-
-def create_receiver_device():
-    return DeviceDescriptor(b'\xA8\xD2\x1B\x0c', 0x21, TELEMETRY_RANGE.FLYBY)
-
-
 class MyTestCase(unittest.TestCase):
     def test_handshake_1(self):
-        device = create_student_device()
-        srxl2 = SRXL2(device, '/dev/tty.usbserial-0001')
-        with srxl2.connect():
+        device = create_remote_receiver_device()
+        srxl2 = SRXL2(device, SERIAL_PORT)
+        with srxl2.connect() as ser:
+            delay(22)
+            ser.write(b'\x00\x01\x02\x03')
+            delay(22)
+            srxl2.send_handshake(0x31)
+            delay(22)
+            srxl2.send_handshake(0x31)
+            delay(22)
+            srxl2.send_handshake(0x31)
             delay(22)
             srxl2.send_handshake(0xff)
             delay(22)
+            print("Response:")
+            print(ser.readlines())
 
     def test_handshake(self):
         device = create_student_device()

@@ -24,6 +24,9 @@ class DeviceDescriptor:
     telemetry_range: TELEMETRY_RANGE = TELEMETRY_RANGE.FLYBY
     fwd_programming_enabled = False
 
+    def get_info(self):
+        return 1
+
 
 class SRXL2:
     logger = logging.getLogger("SRXL2")
@@ -42,7 +45,7 @@ class SRXL2:
         return self.serial
 
     def send_handshake(self, dst_id=0):
-        packet = struct.pack('<5B4s', self.device.id, dst_id, 10, 0, 5, self.device.uid)
+        packet = struct.pack('<5B4s', self.device.id, dst_id, 10, self.device.supports_baud400, self.device.get_info(), self.device.uid)
         message = self.prep_message(0x21, packet)
         self.send(message)
 
@@ -59,13 +62,14 @@ class SRXL2:
     def send(self, msg):
         self.logger.debug(f"Sent msg ({len(msg)}): {msg.hex(' ').upper()}")
         self.serial.write(msg)
+        self.serial.flush()
 
     def send_control(self, ch_data: Dict[int, int], cmd=0x0, reply_id=0x0, rssi=0, frame_losses=0):
         ch_mask = 0
         channels = [None] * 32
         for ch, dat in ch_data.items():
             ch_mask = set_bit(ch_mask, ch)
-            channels[ch] = dat
+            channels[ch] = dat & 0xffff
         data = (c for c in channels if c is not None)
         packet = struct.pack(f'<2BBHI{len(ch_data)}H', cmd, reply_id, rssi, frame_losses, ch_mask, *data)
         message = self.prep_message(0xCD, packet)
