@@ -133,6 +133,9 @@ class SRXL2Events:
     def on_before_message_sent(self, msg: SRXL2Packet):
         pass
 
+    def on_after_message_sent(self, msg: SRXL2Packet):
+        pass
+
     def on_message_received(self, msg: SRXL2Packet):
         pass
 
@@ -185,6 +188,7 @@ class SRXL2:
         self.events.fire_event(SRXL2Events.on_before_message_sent, msg)
         self.serial.write(msg)
         self.serial.flush()
+        self.events.fire_event(SRXL2Events.on_after_message_sent, msg)
 
     def send_control(self, ch_data: Dict[int, int], cmd=0x0, reply_id=0x0, rssi=0, frame_losses=0):
         ch_mask = 0

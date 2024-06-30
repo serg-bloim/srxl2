@@ -88,3 +88,7 @@ class RemoteReceiver:
             logger.info(f"Sending message of type: {hex(msg.p_type)} x {msg.len()} len")
             self.parent.events.fire_event(RemoteReceiverEvents.on_before_message_sent, msg)
             pass
+
+        def on_after_message_sent(self, msg):
+            self.parent.events.fire_event(RemoteReceiverEvents.on_after_message_sent, msg)
+            pass
