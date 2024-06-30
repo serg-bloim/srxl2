@@ -118,7 +118,7 @@ class PacketBuilder:
     def release_packet(self):
         crc = self.calc_crc16()
         try:
-            assert crc == bytes(self.crc)
+            assert crc.to_bytes(2, "big", signed=False) == bytes(self.crc)
             return SRXL2Packet(self.packet_type, bytes(self.data))
         except:
             self.logger.warning("CRC check failed")
@@ -130,10 +130,10 @@ class PacketBuilder:
 
 
 class SRXL2Events:
-    def on_before_message_sent(self, msg):
+    def on_before_message_sent(self, msg: SRXL2Packet):
         pass
 
-    def on_message_received(self, msg):
+    def on_message_received(self, msg: SRXL2Packet):
         pass
 
 
@@ -182,6 +182,7 @@ class SRXL2:
         if delay > 0:
             time.sleep(delay)
         self.last_packet_s = next_timeframe
+        self.events.fire_event(SRXL2Events.on_before_message_sent, msg)
         self.serial.write(msg)
         self.serial.flush()
 

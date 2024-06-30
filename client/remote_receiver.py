@@ -5,8 +5,9 @@ from protocols.srxl2 import SRXL2, Srxl2PackType, SRXL2Handshake, SRXL2Events, S
 from utils.common import cap, EventsHandler
 
 
-class RemoteReceiverEvents:
-    pass
+class RemoteReceiverEvents(SRXL2Events):
+    def on_handshake_done(self, success: bool):
+        pass
 
 
 @dataclasses.dataclass
@@ -55,9 +56,11 @@ class RemoteReceiver:
             pass
         if self.followers:
             self._srxl2.send_handshake(0xff)
+            self.events.fire_event(RemoteReceiverEvents.on_handshake_done, True)
             return True
         else:
             logger.warning("No followers responded")
+            self.events.fire_event(RemoteReceiverEvents.on_handshake_done, False)
             return False
 
     def main_cycle(self):
@@ -79,7 +82,9 @@ class RemoteReceiver:
 
         def on_message_received(self, msg: SRXL2Packet):
             logger.info(f"Received message of type: {hex(msg.p_type)} x {msg.len()} len")
+            self.parent.events.fire_event(RemoteReceiverEvents.on_message_received, msg)
 
         def on_before_message_sent(self, msg):
             logger.info(f"Sending message of type: {hex(msg.p_type)} x {msg.len()} len")
+            self.parent.events.fire_event(RemoteReceiverEvents.on_before_message_sent, msg)
             pass

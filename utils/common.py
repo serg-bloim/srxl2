@@ -17,8 +17,13 @@ def cap(v, a, b):
 
 T = TypeVar('T')
 
+
 class EventsHandler(Generic[T]):
     _listeners: List[T] = []
 
     def add_event_listener(self, el: T):
         self._listeners.append(el)
+
+    def fire_event(self, evt_method, *args, **kwargs):
+        for l in self._listeners:
+            evt_method(l, *args, **kwargs)
