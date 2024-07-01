@@ -1,10 +1,12 @@
 import dataclasses
+import logging
 import struct
 from typing import Iterator
 
 import serial
 
 from utils import crc16
+from utils.my_logging import get_logger
 
 
 @dataclasses.dataclass
@@ -16,18 +18,21 @@ class PS4Packet:
         return 0
 
 
+logger = get_logger("PS4Serial")
+
 class PS4Serial:
     _serial: serial.Serial
 
-    def __init__(self, port: str) -> None:
+    def __init__(self, port: str, skip_crc_check=False) -> None:
         super().__init__()
+        self.skip_crc_check = skip_crc_check
         self.p_len = 0
         self.p_type = 0
         self.port = port
         self.data_processed = 0
 
     def connect(self):
-        self._serial = serial.Serial(self.port)
+        self._serial = serial.Serial(self.port, 115200, timeout=0.001)
 
     def read_messages(self) -> Iterator[PS4Packet]:
         if self._serial.in_waiting:
@@ -36,9 +41,15 @@ class PS4Serial:
                 if self.p_type:
                     if self._serial.in_waiting < self.p_len + 2:
                         break
-                    data = self._serial.read(self.p_len)
+                    data = self._serial.read(self.p_len-6)
                     crc = self._serial.read(2)
-                    if self.check_crc(data, crc):
+                    crc_actual = self.calc_crc(data)
+                    crc_check = crc == crc_actual
+                    if not crc_check:
+                        logger.warn(f"Error while parsing message. CRC mismatch: {crc.hex(' ').upper()} != {crc_actual.hex(' ').upper()} ")
+                    else:
+                        pass
+                    if self.skip_crc_check or crc_check:
                         yield PS4Packet(self.p_type, data)
                         self.p_type, self.p_len = 0, 0
                 # Look for a next header
@@ -52,8 +63,8 @@ class PS4Serial:
                 if p_hend != 0xB5:
                     self.p_type, self.p_len = 0, 0
 
-    def check_crc(self, data, p_crc):
+    def calc_crc(self, data):
         header = struct.pack('4B', 0xA6, self.p_type, self.p_len, 0xB5)
         crc = crc16.crc16xmodem(header)
         crc = crc16.crc16xmodem(data, crc)
-        return crc.to_bytes(2, "big") == p_crc
+        return crc.to_bytes(2, "big")

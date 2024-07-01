@@ -5,11 +5,11 @@ import serial
 from protocols.srxl2 import SRXL2
 from srxl2_test_utils import create_remote_receiver_device, create_student_device
 from utils.common import delay
-from utils.my_logging import setup_logging
+from utils.my_logging import get_logger
 
 SERIAL_PORT = 'COM3'
 
-setup_logging()
+get_logger()
 
 
 class MyTestCase(unittest.TestCase):

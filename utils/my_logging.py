@@ -9,5 +9,6 @@ def wrap_format(handler):
 
 logging.basicConfig(level=logging.DEBUG, handlers=[wrap_format(logging.StreamHandler())])
 
-def setup_logging():
-    pass
+
+def get_logger(name):
+    return logging.getLogger(name)

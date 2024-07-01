@@ -5,10 +5,10 @@ import unittest
 from protocols.srxl2 import SRXL2
 from srxl2_test_utils import create_remote_receiver_device
 from utils.common import delay
-from utils.my_logging import setup_logging
+from utils.my_logging import get_logger
 
 SERIAL_PORT = 'loop://'
-setup_logging()
+get_logger()
 
 class MyTestCase2(unittest.TestCase):
     def test_scenario1(self):

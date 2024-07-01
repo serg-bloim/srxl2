@@ -5,10 +5,10 @@ from client.ps4serial import PS4Serial
 from client.remote_receiver import RemoteReceiver, RemoteReceiverEvents
 from protocols.srxl2 import SRXL2, Srxl2PackType, SRXL2Handshake, SRXL2Packet
 from srxl2_test_utils import create_remote_receiver_device
-from utils.my_logging import setup_logging
+from utils.my_logging import get_logger
 
 SERIAL_PORT = 'loop://'
-setup_logging()
+get_logger()
 logger = logging.getLogger("RemoteReceiverTest")
 
 
@@ -27,6 +27,7 @@ class MyTestCase2(unittest.TestCase):
                 for msg in ps4.read_messages():
                     msg.get_axis("Lh")
                 pass
+
         ps4 = PS4Serial("loop://")
         devices = set()
         device = create_remote_receiver_device()
