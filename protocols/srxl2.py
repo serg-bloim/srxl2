@@ -62,8 +62,8 @@ class SRXL2Handshake(SRXL2Packet):
     uid: int = dataclasses.field(init=False)
 
     def __post_init__(self):
-        data = super().p_data
-        assert super().p_type == 0x21
+        data = self.p_data
+        assert self.p_type == 0x21
         assert len(data) == 9
         self.src_id, self.dst_id, self.priority, self.baud, self.info, self.uid = struct.unpack(SRXL2_PACKET_HANDSHAKE_FORMAT, data)
 
@@ -98,9 +98,12 @@ class PacketBuilder:
             self.state = _State.PACKET_LEN
         elif self.state == _State.PACKET_LEN:
             self.packet_len = byte
-            self.state = _State.PACKET_DATA
-            self.data = bytearray(self.packet_len - 5)
-            self.data_processed = 0
+            if byte >= 5:
+                self.state = _State.PACKET_DATA
+                self.data = bytearray(self.packet_len - 5)
+                self.data_processed = 0
+            else:
+                self.state = _State.NO_PACKET
         elif self.state == _State.PACKET_DATA:
             self.data[self.data_processed] = byte
             self.data_processed += 1

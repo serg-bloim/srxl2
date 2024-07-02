@@ -15,6 +15,11 @@ def cap(v, a, b):
         return v
 
 
+def normalize(v, src_a, src_b, dst_a, dst_b):
+    p = (v - src_a) / (src_b - src_a)
+    return dst_a + (dst_b - dst_a) * p
+
+
 T = TypeVar('T')
 
 

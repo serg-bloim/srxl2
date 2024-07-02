@@ -9,7 +9,7 @@ from utils.my_logging import get_logger
 
 SERIAL_PORT = 'COM3'
 
-get_logger()
+get_logger("MyTestCase")
 
 
 class MyTestCase(unittest.TestCase):
