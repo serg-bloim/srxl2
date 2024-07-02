@@ -25,7 +25,13 @@ class MyTestCase2(unittest.TestCase):
                 v = math.sin(time.time() / 2)
                 v = int(normalize(v, -1, 1, 0x2AA0, 0xD554))
                 v &= 0xFFFC
-                srxl2.send_control({0: v, 1: v, 2: v, 3: v, 4: v, 5: v, 6: v})
+                ch5_safe_mode = 0xD540  # beginner
+                ch5_safe_mode = 0x8000  # advanced
+                ch5_safe_mode = 0x2AC0  # expert
+                ch6_no_panic = 0xD540  # no panic
+                # ch6_no_panic = 0x8000  # maybe panic
+                # ch6_no_panic = 0x2AC0  # maybe panic
+                srxl2.send_control({0: v, 1: v, 2: v, 3: v, 4: ch5_safe_mode, 5: ch6_no_panic, 6: ch5_safe_mode})
                 # srxl2.send_control({5: v, 6: 0xD540})
             delay(5000)
             print("Response:")
