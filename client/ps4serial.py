@@ -14,11 +14,22 @@ class PS4Packet:
     p_type: int
     data: bytes
 
-    def get_axis(self, control):
-        return 0
+
+@dataclasses.dataclass
+class PS4ControlPacket(PS4Packet):
+    def __post_init__(self):
+        data = self.data
+        assert self.p_type == 0x10
+        self.buttons_len, self.controls_len, self.gyro_len, self.buttons = struct.unpack_from("3BI", data)
+        self.sliders = list(struct.unpack_from(f"{self.controls_len}b", data, 8))
+
+    @staticmethod
+    def from_generic(packet: PS4Packet) -> "PS4ControlPacket":
+        return PS4ControlPacket(packet.p_type, packet.data)
 
 
 logger = get_logger("PS4Serial")
+
 
 class PS4Serial:
     _serial: serial.Serial
@@ -41,7 +52,7 @@ class PS4Serial:
                 if self.p_type:
                     if self._serial.in_waiting < self.p_len + 2:
                         break
-                    data = self._serial.read(self.p_len-6)
+                    data = self._serial.read(self.p_len - 6)
                     crc = self._serial.read(2)
                     crc_actual = self.calc_crc(data)
                     crc_check = crc == crc_actual

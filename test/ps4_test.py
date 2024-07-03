@@ -5,7 +5,7 @@ import unittest
 
 import serial
 
-from client.ps4serial import PS4Serial
+from client.ps4serial import PS4Serial, PS4ControlPacket
 
 
 class MyTestCase(unittest.TestCase):
@@ -15,25 +15,19 @@ class MyTestCase(unittest.TestCase):
             print(p)
 
     def test_serial_write(self):
-        ps4 = PS4Serial("/dev/tty.usbserial-10", skip_crc_check=True)
+        ps4 = PS4Serial("COM4", skip_crc_check=True)
         ps4.connect()
         with open("log.txt", "wt") as txt:
-            with open("log.dat", "wb") as bin:
+            with open("log.dat", "wb") as binf:
                 i = 0
                 while True:
                     i += 1
                     for msg in ps4.read_messages():
-                        if len(msg.data) == 4:
-                            lx, ly, rx, ry = struct.unpack("4b", msg.data)
-                            bin.write(i.to_bytes(4, 'big'))
-                            bin.write(msg.data)
-                            print(f"{i:<10} {lx} {ly} {rx} {ry} ", file=txt)
+                        if msg.p_type == 0x10:
+                            ctrl = PS4ControlPacket.from_generic(msg)
 
-                            if lx == 82:
-                                pass
-                            else:
-                                pass
-                            print(f"{lx:>4}   {ly:>4}   {rx:>4}   {ry:>4}")
+                            print(f"{i:<10} {ctrl.buttons_len} {ctrl.controls_len} {ctrl.gyro_len} {bin(ctrl.buttons)} {ctrl.sliders}")
+
 
 
 def serial_ports():

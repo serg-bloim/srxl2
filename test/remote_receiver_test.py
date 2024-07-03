@@ -25,7 +25,7 @@ class MyTestCase2(unittest.TestCase):
 
             def on_after_message_sent(self, msg: SRXL2Packet):
                 for msg in ps4.read_messages():
-                    msg.get_axis("Lh")
+                    msg.get_axis("Lx")
                 pass
 
         ps4 = PS4Serial("loop://")
